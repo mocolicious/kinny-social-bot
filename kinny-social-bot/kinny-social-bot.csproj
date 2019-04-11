@@ -4,6 +4,20 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>kinny_social_bot</RootNamespace>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+    <PackageReference Include="RedditSharp" Version="2.0.0-CI00075" />
+    <PackageReference Include="Telegram.Bot" Version="14.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\kinny-social-core\kinny-social-core.csproj" />
+  </ItemGroup>
 
 </Project>
