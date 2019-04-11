@@ -53,6 +53,7 @@ namespace kinny_social_bot
             hostBuilder.HostingEnvironment.EnvironmentName = hostBuilder.Configuration["ASPNETCORE_ENVIRONMENT"];
 
             var wee = hostBuilder.HostingEnvironment.EnvironmentName;
+
             services
                 .AddSingleton(socialApiClient)
                 .AddSingleton<ICredentialGetter<DiscordCredentials>, DiscordCredentialGetter>()

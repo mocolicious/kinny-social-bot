@@ -4,7 +4,7 @@ using kinny_social_core.Exceptions;
 namespace kinny_social_core.Parsers.Impl {
     public class TipParser : ITipParser
     {
-        private static readonly Regex AmountRegex = new Regex(@"-?\d+(?:\.\d+)?");
+        private static readonly Regex AmountRegex = new Regex(@"[\+|-]-?\d+(?:\.\d+)?");
 
         public double GetTipAmount(string message)
         {
