@@ -1,4 +1,5 @@
-﻿namespace kinny_social_core.Exceptions {
+﻿namespace kinny_social_core.Exceptions
+{
     public class NoUserMentionedException : SocialException
     {
         public NoUserMentionedException() { }

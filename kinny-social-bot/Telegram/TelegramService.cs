@@ -19,9 +19,9 @@ namespace kinny_social_bot.Telegram
 {
     internal class TelegramService : SocialService<Update, TelegramCredentials>
     {
+        private readonly ConcurrentDictionary<string, int> _telegramUsernameToIdMap;
         private TelegramBotClient _client;
         private User _currentUser;
-        private readonly ConcurrentDictionary<string, int> _telegramUsernameToIdMap;
 
         public TelegramService(SocialClient apiClient,
             ILoggerFactory loggerFactory,
@@ -31,18 +31,20 @@ namespace kinny_social_bot.Telegram
         {
             _telegramUsernameToIdMap = new ConcurrentDictionary<string, int>();
         }
+
         protected override async Task StartService(CancellationToken cancellationToken)
         {
-            var credentials = await CredentialGetter.GetCredentials().ConfigureAwait(false);
+            TelegramCredentials credentials = await CredentialGetter.GetCredentials().ConfigureAwait(false);
             _client = new TelegramBotClient(credentials.Token);
             _currentUser = await _client.GetMeAsync(cancellationToken).ConfigureAwait(false);
             _client.OnReceiveError += BotOnReceiveError;
             _client.OnUpdate += BotOnOnUpdate;
             _client.StartReceiving(cancellationToken: cancellationToken);
-          
+
             Logger.LogInformation($"{Platform} started on account \"{_currentUser.Username}\"");
             await Task.Delay(-1, cancellationToken);
         }
+
         private async void BotOnOnUpdate(object sender, UpdateEventArgs e)
         {
             try
@@ -51,44 +53,58 @@ namespace kinny_social_bot.Telegram
             }
             catch (Exception ex)
             {
-               Logger.LogError(ex.Message,ex);
+                Logger.LogError(ex.Message, ex);
             }
         }
+
         private async Task BotOnMessageReceived(Update context)
         {
-            if (context.Message == null) return;
-            if (context.Message.From.IsBot) return;
+            if (context.Message == null)
+            {
+                return;
+            }
+
+            if (context.Message.From.IsBot)
+            {
+                return;
+            }
 
             _telegramUsernameToIdMap.AddOrUpdate(context.Message?.From?.Username ?? context.Message.From.FirstName,
                 s => context.Message.From.Id,
                 (s, l) => context.Message.From.Id);
 
-            if (context.Message.Type != MessageType.Text) return;
-            Logger.LogInformation($"Received message from {context.Message.From.Username ?? context.Message.From.FirstName} ({context.Message.From.Id})");
+            if (context.Message.Type != MessageType.Text)
+            {
+                return;
+            }
+
+            Logger.LogInformation(
+                $"Received message from {context.Message.From.Username ?? context.Message.From.FirstName} ({context.Message.From.Id})");
+
             try
             {
                 await SendTip(context).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                var inner = e;
+                Exception inner = e;
 
-                while (inner.InnerException != null)
-                {
-                    inner = inner.InnerException;
-                }
+                while (inner.InnerException != null) inner = inner.InnerException;
 
                 if (inner is SocialException sex)
                 {
-                    await _client.SendTextMessageAsync(context.Message.Chat.Id, sex.Message, ParseMode.Default, false, false, context.Message.MessageId);
+                    await _client.SendTextMessageAsync(context.Message.Chat.Id, sex.Message, ParseMode.Default, false,
+                        false, context.Message.MessageId);
                 }
+
                 Logger.LogError(inner.Message, inner);
             }
         }
 
         private void BotOnReceiveError(object sender, ReceiveErrorEventArgs e)
         {
-            Logger.LogError($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}", e.ApiRequestException);
+            Logger.LogError($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}",
+                e.ApiRequestException);
         }
 
         protected override Task<string> GetMessageText(Update context)
@@ -98,43 +114,47 @@ namespace kinny_social_bot.Telegram
 
         protected override Task<bool> IsTip(Update context)
         {
-            var containsSlashCommand = context.Message.Text.ToLower().Contains($"/{_currentUser.FirstName} ");
-            var isBotMentioned = context.Message.EntityValues != null
-                                 && context.Message.EntityValues.Any(v => v.Contains(_currentUser.Username));
+            bool containsSlashCommand = context.Message.Text.ToLower().Contains($"/{_currentUser.FirstName} ");
+
+            bool isBotMentioned = context.Message.EntityValues != null
+                                  && context.Message.EntityValues.Any(v => v.Contains(_currentUser.Username));
 
             return Task.FromResult(containsSlashCommand || isBotMentioned);
         }
 
         protected override Task<ISocialUser> GetFromUser(Update context)
         {
-            return Task.FromResult((ISocialUser)new SocialUser(context.Message.From.Username ?? context.Message.From.FirstName, context.Message.From.Id.ToString()));
+            return Task.FromResult((ISocialUser) new SocialUser(
+                context.Message.From.Username ?? context.Message.From.FirstName, context.Message.From.Id.ToString()));
         }
 
         protected override Task<ISocialUser[]> GetMessageMentionedUsers(Update context)
         {
-
             if (context.Message.ReplyToMessage != null)
             {
                 return Task.FromResult(new ISocialUser[]
                 {
-                    new SocialUser(context.Message.ReplyToMessage.From.Username ?? context.Message.ReplyToMessage.From.FirstName,
+                    new SocialUser(
+                        context.Message.ReplyToMessage.From.Username ?? context.Message.ReplyToMessage.From.FirstName,
                         context.Message.ReplyToMessage.From.Id.ToString())
                 });
             }
 
-            var fromUserName = context.Message.From.Username ?? context.Message.From.FirstName;
-            var mentionedUsers = context.Message.EntityValues.Where(v => !v.Contains(_currentUser.Username) && !v.Contains("/kinnytips") && !v.Contains(fromUserName)).Select(v => v.Replace("@", ""))
+            string fromUserName = context.Message.From.Username ?? context.Message.From.FirstName;
+
+            string[] mentionedUsers = context.Message.EntityValues
+                .Where(v => !v.Contains(_currentUser.Username) && !v.Contains("/kinnytips") &&
+                            !v.Contains(fromUserName)).Select(v => v.Replace("@", ""))
                 .ToArray();
 
             HashSet<ISocialUser> users = new HashSet<ISocialUser>();
 
             for (int i = 0; i < mentionedUsers.Length; i++)
             {
-                if (_telegramUsernameToIdMap.TryGetValue(mentionedUsers[i], out var toUserId))
+                if (_telegramUsernameToIdMap.TryGetValue(mentionedUsers[i], out int toUserId))
                 {
                     users.Add(new SocialUser(mentionedUsers[i], toUserId.ToString()));
                 }
-               
             }
 
             return Task.FromResult(users.ToArray());
@@ -147,7 +167,7 @@ namespace kinny_social_bot.Telegram
 
         protected override Task<SocialQueuedItem> GetSocialQueueItem(SocialTipRequest request, Update message)
         {
-            return Task.FromResult((SocialQueuedItem)new TelegramQueueItem(_client, message.Message, request));
+            return Task.FromResult((SocialQueuedItem) new TelegramQueueItem(_client, message.Message, request));
         }
     }
 }

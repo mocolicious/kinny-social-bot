@@ -4,14 +4,14 @@ namespace kinny_social_core.Models
 {
     public class SocialUser : ISocialUser
     {
-        public string Username { get; }
-        public string UserId { get; }
-
         public SocialUser(string username, string userId)
         {
             Username = username ?? throw new ArgumentNullException(nameof(username));
             UserId = userId ?? throw new ArgumentNullException(nameof(userId));
         }
+
+        public string Username { get; }
+        public string UserId { get; }
 
         protected bool Equals(SocialUser other)
         {
@@ -30,7 +30,7 @@ namespace kinny_social_core.Models
                 return true;
             }
 
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
@@ -40,9 +40,10 @@ namespace kinny_social_core.Models
 
         public override int GetHashCode()
         {
-            return (UserId != null ? UserId.GetHashCode() : 0);
+            return UserId != null ? UserId.GetHashCode() : 0;
         }
     }
+
     public interface ISocialUser
     {
         string Username { get; }

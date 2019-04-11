@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -14,7 +12,8 @@ namespace kinny_social_bot.Discord
     {
         public SocketCommandContext Context { get; }
 
-        public DiscordQueueItem(SocketCommandContext context, SocialTipRequest socialTipRequest) : base(socialTipRequest)
+        public DiscordQueueItem(SocketCommandContext context, SocialTipRequest socialTipRequest) : base(
+            socialTipRequest)
         {
             Context = context;
         }
@@ -24,13 +23,13 @@ namespace kinny_social_bot.Discord
             try
             {
                 await user.SendMessageAsync(null, false, embeded);
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
         }
+
         public override async Task Reply(SocialTipStatusResponse response)
         {
             try
@@ -40,7 +39,7 @@ namespace kinny_social_bot.Discord
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.Title = "Tip Received";
                     embedBuilder.Color = Color.DarkBlue;
-                    embedBuilder.Footer = new EmbedFooterBuilder { IconUrl = "https://kinny.io/favicon.ico" };
+                    embedBuilder.Footer = new EmbedFooterBuilder {IconUrl = "https://kinny.io/favicon.ico"};
 
                     embedBuilder.Description =
                         $"Received {SocialTipRequest.Amount} KIN from {Context.User.Username}. You can sign up and view your tip @ https://kinny.io.";
@@ -58,7 +57,7 @@ namespace kinny_social_bot.Discord
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.Title = "Tip Failed";
                     embedBuilder.Color = Color.DarkRed;
-                    embedBuilder.Footer = new EmbedFooterBuilder { IconUrl = "https://kinny.io/favicon.ico" };
+                    embedBuilder.Footer = new EmbedFooterBuilder {IconUrl = "https://kinny.io/favicon.ico"};
                     embedBuilder.Description = $"{response.Message}!";
 
                     await Context.User.SendMessageAsync(null, false, embedBuilder.Build());
@@ -68,7 +67,7 @@ namespace kinny_social_bot.Discord
                     EmbedBuilder embedBuilder = new EmbedBuilder();
                     embedBuilder.Title = "Tip Sent";
                     embedBuilder.Color = Color.DarkGreen;
-                    embedBuilder.Footer = new EmbedFooterBuilder { IconUrl = "https://kinny.io/favicon.ico" };
+                    embedBuilder.Footer = new EmbedFooterBuilder {IconUrl = "https://kinny.io/favicon.ico"};
 
                     embedBuilder.Description =
                         $"{SocialTipRequest.Amount} KIN sent to {SocialTipRequest.OfferParticipantsData.To.Username}!";

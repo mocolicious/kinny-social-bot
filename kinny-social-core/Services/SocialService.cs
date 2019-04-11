@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using kinny_social_core.Api;
@@ -15,12 +13,14 @@ namespace kinny_social_core.Services
 {
     public abstract class SocialService<TContext, TCredentials> : BackgroundService
     {
+        private readonly SocialClient _apiClient;
+        private readonly ITipParser _tipParser;
         protected readonly ICredentialGetter<TCredentials> CredentialGetter;
         protected readonly ILogger Logger;
         protected readonly string Platform;
-        private readonly SocialClient _apiClient;
-        private readonly ITipParser _tipParser;
-        protected SocialService(SocialClient apiClient, ILogger logger, ICredentialGetter<TCredentials> credentialGetter, string platform, ITipParser tipParser = null)
+
+        protected SocialService(SocialClient apiClient, ILogger logger,
+            ICredentialGetter<TCredentials> credentialGetter, string platform, ITipParser tipParser = null)
         {
             _apiClient = apiClient;
             Logger = logger;
@@ -42,6 +42,7 @@ namespace kinny_social_core.Services
         protected abstract Task<ISocialUser[]> GetMessageMentionedUsers(TContext context);
         protected abstract Task<string> GetMessageId(TContext context);
         protected abstract Task<SocialQueuedItem> GetSocialQueueItem(SocialTipRequest request, TContext context);
+
         protected async Task<SocialTipResponse[]> SendTip(TContext context)
         {
             if (!await IsTip(context).ConfigureAwait(false))
@@ -49,21 +50,22 @@ namespace kinny_social_core.Services
                 return new SocialTipResponse[0];
             }
 
-            var fromUser = await GetFromUser(context).ConfigureAwait(false);
-            var messageId = await GetMessageId(context).ConfigureAwait(false);
-            var mentionedUsers = await GetMessageMentionedUsers(context).ConfigureAwait(false);
+            ISocialUser fromUser = await GetFromUser(context).ConfigureAwait(false);
+            string messageId = await GetMessageId(context).ConfigureAwait(false);
+            ISocialUser[] mentionedUsers = await GetMessageMentionedUsers(context).ConfigureAwait(false);
 
             if (mentionedUsers.Length == 0)
             {
                 throw new NoUserMentionedException("No mentioned user to tip were present.");
             }
 
-            var messageText = await GetMessageText(context).ConfigureAwait(false);
-            var tipAmount = _tipParser.GetTipAmount(messageText);
-            var listOfResponses = new List<SocialTipResponse>();
+            string messageText = await GetMessageText(context).ConfigureAwait(false);
+            double tipAmount = _tipParser.GetTipAmount(messageText);
+            List<SocialTipResponse> listOfResponses = new List<SocialTipResponse>();
+
             foreach (ISocialUser mentionedUser in mentionedUsers)
             {
-                var socialTipRequest = new SocialTipRequest
+                SocialTipRequest socialTipRequest = new SocialTipRequest
                 {
                     From = fromUser.UserId,
                     To = mentionedUser.UserId,
@@ -87,22 +89,25 @@ namespace kinny_social_core.Services
                     MessageId = messageId + mentionedUser.UserId
                 };
 
-                listOfResponses.Add(await Tip(await GetSocialQueueItem(socialTipRequest, context).ConfigureAwait(false)));
+                listOfResponses.Add(
+                    await Tip(await GetSocialQueueItem(socialTipRequest, context).ConfigureAwait(false)));
             }
 
             return listOfResponses.ToArray();
         }
+
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Logger.LogInformation($"{Platform} Service is starting.");
             await StartService(cancellationToken).ConfigureAwait(false);
             Logger.LogInformation($" {Platform} Service is stopping.");
         }
+
         private async Task<SocialTipResponse> Tip(SocialQueuedItem item)
         {
-            Logger.LogInformation($"{Platform} Service sent {item.SocialTipRequest.Amount} KIN from {item.SocialTipRequest.From} to {item.SocialTipRequest.To}");
+            Logger.LogInformation(
+                $"{Platform} Service sent {item.SocialTipRequest.Amount} KIN from {item.SocialTipRequest.From} to {item.SocialTipRequest.To}");
             return await _apiClient.Tip(item).ConfigureAwait(false);
         }
-        
     }
 }

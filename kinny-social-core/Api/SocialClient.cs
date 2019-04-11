@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Newtonsoft.Json;
@@ -10,7 +8,7 @@ using Refit;
 
 namespace kinny_social_core.Api
 {
-    interface ISocialClient
+    internal interface ISocialClient
     {
         [Post("/social/tip/{secret}")]
         Task<SocialTipResponse> Tip([Body] SocialTipRequest request, [AliasAs("secret")] string secret);
@@ -40,7 +38,7 @@ namespace kinny_social_core.Api
             timerQueueSendKin.Start();
         }
 
-        private  async void TimerQueueSendKinOnElapsed(object sender, ElapsedEventArgs e)
+        private async void TimerQueueSendKinOnElapsed(object sender, ElapsedEventArgs e)
         {
             if (_queueItems.IsEmpty)
             {
@@ -67,7 +65,8 @@ namespace kinny_social_core.Api
                 if (response.Status != TransactionStatus.Queued && response.Status != TransactionStatus.Error &&
                     response.Status != TransactionStatus.MarketPlaceApiError)
                 {
-                    await item.Reply(response).ConfigureAwait(false); ;
+                    await item.Reply(response).ConfigureAwait(false);
+                    ;
                 }
                 else
                 {
@@ -139,7 +138,9 @@ namespace kinny_social_core.Api
             if (response.Status != TransactionStatus.Queued)
             {
                 await socialQueuedItem.Reply(
-                    new SocialTipStatusResponse { Message = response.Message, Status = response.Status }).ConfigureAwait(false); ;
+                        new SocialTipStatusResponse {Message = response.Message, Status = response.Status})
+                    .ConfigureAwait(false);
+                ;
             }
 
             return response;
@@ -161,7 +162,9 @@ namespace kinny_social_core.Api
         {
             try
             {
-                return await _client.Balance(id, provider, _secret).ConfigureAwait(false); ;
+                return await _client.Balance(id, provider, _secret).ConfigureAwait(false);
+
+                ;
             }
             catch (ApiException e)
             {

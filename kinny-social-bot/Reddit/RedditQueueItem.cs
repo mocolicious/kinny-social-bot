@@ -10,23 +10,25 @@ namespace kinny_social_bot.Reddit
         public RedditSharp.Reddit Reddit { get; }
         public Comment Comment { get; }
 
-        public RedditQueueItem(RedditSharp.Reddit reddit, Comment comment, SocialTipRequest socialTipRequest) : base(socialTipRequest)
+        public RedditQueueItem(RedditSharp.Reddit reddit, Comment comment, SocialTipRequest socialTipRequest) : base(
+            socialTipRequest)
         {
             Reddit = reddit;
             Comment = comment;
         }
+
         private async Task SendMessage(string subject, string body, string to)
         {
             try
             {
-                await Reddit.ComposePrivateMessageAsync(subject,body,to);
-
+                await Reddit.ComposePrivateMessageAsync(subject, body, to);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
-        }   
+        }
+
         public override async Task Reply(SocialTipStatusResponse response)
         {
             try

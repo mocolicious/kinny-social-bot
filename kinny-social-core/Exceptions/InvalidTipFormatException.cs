@@ -1,4 +1,5 @@
-﻿namespace kinny_social_core.Exceptions {
+﻿namespace kinny_social_core.Exceptions
+{
     public class InvalidTipFormatException : SocialException
     {
         public InvalidTipFormatException(string tip) : base($"The provided tip '{tip}' is invalid")

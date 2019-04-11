@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using kinny_social_core.Services;
@@ -23,6 +21,7 @@ namespace kinny_social_bot.Discord
     public class DiscordCredentialGetter : ICredentialGetter<DiscordCredentials>
     {
         private readonly DiscordCredentials _credentials;
+
         public DiscordCredentialGetter(IConfiguration config)
         {
             _credentials = new DiscordCredentials(config["discord_token"]);

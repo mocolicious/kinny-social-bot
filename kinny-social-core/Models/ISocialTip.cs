@@ -4,11 +4,6 @@ namespace kinny_social_core.Models
 {
     public class SocialTip : ISocialTip
     {
-        public ISocialUser FromUser { get; }
-        public ISocialUser[] ToUsers { get; }
-        public string SocialPlatform { get; }
-        public int Amount { get; }
-
         public SocialTip(string socialPlatform, ISocialUser fromUser, int amount, params ISocialUser[] users)
         {
             SocialPlatform = socialPlatform ?? throw new ArgumentNullException(nameof(socialPlatform));
@@ -16,6 +11,11 @@ namespace kinny_social_core.Models
             Amount = amount;
             ToUsers = users ?? throw new ArgumentNullException(nameof(users));
         }
+
+        public ISocialUser FromUser { get; }
+        public ISocialUser[] ToUsers { get; }
+        public string SocialPlatform { get; }
+        public int Amount { get; }
     }
 
     public interface ISocialTip

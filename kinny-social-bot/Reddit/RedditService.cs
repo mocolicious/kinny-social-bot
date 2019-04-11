@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -13,32 +12,29 @@ using Microsoft.Extensions.Logging;
 using RedditSharp;
 using RedditSharp.Things;
 using Telegram.Bot.Args;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-
 
 namespace kinny_social_bot.Reddit
 {
     internal class RedditService : SocialService<Comment, RedditCredentials>
     {
-        private  RedditSharp.Reddit _client;
-        private  BotWebAgent _webAgent;
+        private RedditSharp.Reddit _client;
         private string _userName;
+        private BotWebAgent _webAgent;
 
 
         public RedditService(SocialClient apiClient,
             ILoggerFactory loggerFactory,
             ICredentialGetter<RedditCredentials> credentialGetter,
             ITipParser tipParser = null) : base(apiClient, loggerFactory.CreateLogger<RedditService>(),
-            credentialGetter, "Reddit", tipParser)
-        {
+            credentialGetter, "Reddit", tipParser) { }
 
-        }
         protected override async Task StartService(CancellationToken cancellationToken)
         {
-            var credentials = await CredentialGetter.GetCredentials().ConfigureAwait(false);
+            RedditCredentials credentials = await CredentialGetter.GetCredentials().ConfigureAwait(false);
             _userName = credentials.Username;
-            _webAgent = new BotWebAgent(credentials.Username, credentials.Password, credentials.ClientId, credentials.ClientSecret, credentials.RedirectUrl);
+
+            _webAgent = new BotWebAgent(credentials.Username, credentials.Password, credentials.ClientId,
+                credentials.ClientSecret, credentials.RedirectUrl);
             _client = new RedditSharp.Reddit(_webAgent, true);
             _webAgent.RateLimiter = new RateLimitManager(RateLimitMode.Pace);
 
@@ -50,15 +46,15 @@ namespace kinny_social_bot.Reddit
 
         private async Task StartReddit(CancellationToken cancellationToken)
         {
-            var stream = _client.User.GetUsernameMentions(25).Stream();
-            var listings = _client.User.GetUsernameMentions(25).GetEnumerator(25, -1, true);
+            ListingStream<Comment> stream = _client.User.GetUsernameMentions(25).Stream();
+            IAsyncEnumerator<Comment> listings = _client.User.GetUsernameMentions(25).GetEnumerator(25, -1, true);
             await listings.MoveNext();
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var comment = listings.Current;
+                    Comment comment = listings.Current;
                     await OnCommentReceived(comment).ConfigureAwait(false);
                 }
                 catch (Exception e)
@@ -66,18 +62,23 @@ namespace kinny_social_bot.Reddit
                     Logger.LogError(e.Message, e);
                 }
 
-                
+
                 await listings.MoveNext();
             }
         }
+
         private async Task OnCommentReceived(Comment comment)
         {
-            if (comment == null) return;
+            if (comment == null)
+            {
+                return;
+            }
 
             Logger.LogInformation($"Received message from {comment.AuthorName} ({comment.Id})");
+
             try
             {
-                var tips = await SendTip(comment).ConfigureAwait(false);
+                SocialTipResponse[] tips = await SendTip(comment).ConfigureAwait(false);
 
                 if (tips.All(c => c.Status == TransactionStatus.Queued))
                 {
@@ -86,24 +87,23 @@ namespace kinny_social_bot.Reddit
             }
             catch (Exception e)
             {
-                var inner = e;
+                Exception inner = e;
 
-                while (inner.InnerException != null)
-                {
-                    inner = inner.InnerException;
-                }
+                while (inner.InnerException != null) inner = inner.InnerException;
 
                 if (inner is SocialException sex)
                 {
                     await comment.ReplyAsync($"u/{comment.AuthorName} {e.Message}");
                 }
+
                 Logger.LogError(inner.Message, inner);
             }
         }
 
         private void BotOnReceiveError(object sender, ReceiveErrorEventArgs e)
         {
-            Logger.LogError($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}", e.ApiRequestException);
+            Logger.LogError($"Received error: {e.ApiRequestException.ErrorCode} — {e.ApiRequestException.Message}",
+                e.ApiRequestException);
         }
 
         protected override Task<string> GetMessageText(Comment comment)
@@ -113,9 +113,15 @@ namespace kinny_social_bot.Reddit
 
         protected override Task<bool> IsTip(Comment comment)
         {
-            if (comment == null) return Task.FromResult(false);
-            var commentBody = comment.Body.Trim();
-            return Task.FromResult(comment.Unread && commentBody.Contains(_userName) && !comment.AuthorName.Equals(_userName));
+            if (comment == null)
+            {
+                return Task.FromResult(false);
+            }
+
+            string commentBody = comment.Body.Trim();
+
+            return Task.FromResult(comment.Unread && commentBody.Contains(_userName) &&
+                                   !comment.AuthorName.Equals(_userName));
         }
 
         protected override async Task<ISocialUser> GetFromUser(Comment comment)
@@ -126,7 +132,7 @@ namespace kinny_social_bot.Reddit
 
         protected override async Task<ISocialUser[]> GetMessageMentionedUsers(Comment comment)
         {
-            var thing = await _client.GetThingByFullnameAsync(comment.ParentId).ConfigureAwait(false);
+            Thing thing = await _client.GetThingByFullnameAsync(comment.ParentId).ConfigureAwait(false);
             string toUserName = "";
 
             if (thing is Comment parentComment)
@@ -159,7 +165,7 @@ namespace kinny_social_bot.Reddit
 
         protected override Task<SocialQueuedItem> GetSocialQueueItem(SocialTipRequest request, Comment comment)
         {
-            return Task.FromResult((SocialQueuedItem)new RedditQueueItem(_client, comment, request));
+            return Task.FromResult((SocialQueuedItem) new RedditQueueItem(_client, comment, request));
         }
     }
 }

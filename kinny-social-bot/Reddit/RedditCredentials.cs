@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using kinny_social_bot.Discord;
 using kinny_social_core.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -30,15 +27,16 @@ namespace kinny_social_bot.Reddit
     public class RedditCredentialGetter : ICredentialGetter<RedditCredentials>
     {
         private readonly RedditCredentials _credentials;
+
         public RedditCredentialGetter(IConfiguration config)
         {
-            var username = config["reddit_username"];
-            var password = config["reddit_password"];
-            var clientId = config["reddit_clientId"];
-            var clientSecret = config["reddit_clientsecret"];
-            var redirectUrl = config["reddit_redirecturl"];
+            string username = config["reddit_username"];
+            string password = config["reddit_password"];
+            string clientId = config["reddit_clientId"];
+            string clientSecret = config["reddit_clientsecret"];
+            string redirectUrl = config["reddit_redirecturl"];
 
-            _credentials = new RedditCredentials(username,password,clientId,clientSecret,redirectUrl);
+            _credentials = new RedditCredentials(username, password, clientId, clientSecret, redirectUrl);
         }
 
         public Task<RedditCredentials> GetCredentials()

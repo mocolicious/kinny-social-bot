@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace kinny_social_core.Api
+﻿namespace kinny_social_core.Api
 {
     public class SocialTipResponse
     {
@@ -20,11 +16,13 @@ namespace kinny_social_core.Api
         public double Amount { get; set; }
         public OfferParticipantsData OfferParticipantsData { get; set; }
     }
+
     public class OfferParticipantsData
     {
         public OfferData From { get; set; }
         public OfferData To { get; set; }
     }
+
     public class OfferData
     {
         public string Title { get; set; }
@@ -46,6 +44,6 @@ namespace kinny_social_core.Api
         NotEnoughKin,
         NoKinAsset,
         MarketPlaceApiError,
-        Error,
+        Error
     }
 }

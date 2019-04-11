@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using kinny_social_core.Api;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace kinny_social_bot.Telegram
 {
@@ -20,18 +17,19 @@ namespace kinny_social_bot.Telegram
             TelegramBot = tg;
             Message = message;
         }
+
         private async Task SendMessage(ChatId chatId, string message)
         {
             try
             {
                 await TelegramBot.SendTextMessageAsync(chatId, message).ConfigureAwait(false);
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
         }
+
         public override async Task Reply(SocialTipStatusResponse response)
         {
             try
@@ -48,23 +46,21 @@ namespace kinny_social_bot.Telegram
                 {
                     await SendMessage(fromChatId,
                             $"Hello {SocialTipRequest.OfferParticipantsData.From.Username}," +
-                            $"\n\tTip failed to send to {SocialTipRequest.OfferParticipantsData.To.Username} with error {response.Message}.").ConfigureAwait(false);
-   
+                            $"\n\tTip failed to send to {SocialTipRequest.OfferParticipantsData.To.Username} with error {response.Message}.")
+                        .ConfigureAwait(false);
                 }
                 else
                 {
                     await SendMessage(fromChatId,
-                            $"Hello {SocialTipRequest.OfferParticipantsData.From.Username}, you sent {SocialTipRequest.Amount} KIN to {SocialTipRequest.OfferParticipantsData.To.Username}.").ConfigureAwait(false);
-
+                            $"Hello {SocialTipRequest.OfferParticipantsData.From.Username}, you sent {SocialTipRequest.Amount} KIN to {SocialTipRequest.OfferParticipantsData.To.Username}.")
+                        .ConfigureAwait(false);
                 }
 
                 if (response.Status == TransactionStatus.Ok)
                 {
-
                     await SendMessage(toChatId,
-                            $"Hello {SocialTipRequest.OfferParticipantsData.To.Username}, you received {SocialTipRequest.Amount} KIN from {SocialTipRequest.OfferParticipantsData.From.Username}." +
-                            " You can sign up and view your tip @ https://kinny.io.").ConfigureAwait(false);
-
+                        $"Hello {SocialTipRequest.OfferParticipantsData.To.Username}, you received {SocialTipRequest.Amount} KIN from {SocialTipRequest.OfferParticipantsData.From.Username}." +
+                        " You can sign up and view your tip @ https://kinny.io.").ConfigureAwait(false);
                 }
             }
             catch (Exception e)

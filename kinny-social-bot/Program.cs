@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using kinny_social_bot.Discord;
 using kinny_social_bot.Reddit;
@@ -9,30 +8,27 @@ using kinny_social_core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace kinny_social_bot
 {
-    class Program
+    internal class Program
     {
         public static readonly Dictionary<string, string> DefaultConfiguration = new Dictionary<string, string>
         {
             {"discord_token", "token"},
             {"telegram_token", "token"},
             {"secret", "secret"}
-
         };
 
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
+            HostBuilder hostBuilder = new HostBuilder();
 
-            var hostBuilder = new HostBuilder();
-
-            var host = hostBuilder
+            IHost host = hostBuilder
                 .ConfigureHostConfiguration(ConfigureDelegate)
                 .ConfigureServices(ConfigureDelegate)
-                .ConfigureLogging((ConfigureLogging))
+                .ConfigureLogging(ConfigureLogging)
                 .Build();
 
             await host.StartAsync().ConfigureAwait(false);
@@ -49,10 +45,11 @@ namespace kinny_social_bot
 
         private static void ConfigureDelegate(HostBuilderContext hostBuilder, IServiceCollection services)
         {
-            var socialApiClient = new SocialClient(hostBuilder.Configuration["secret"], hostBuilder.Configuration["social_hostname"]);
+            SocialClient socialApiClient = new SocialClient(hostBuilder.Configuration["secret"],
+                hostBuilder.Configuration["social_hostname"]);
             hostBuilder.HostingEnvironment.EnvironmentName = hostBuilder.Configuration["ASPNETCORE_ENVIRONMENT"];
 
-            var wee = hostBuilder.HostingEnvironment.EnvironmentName;
+            string wee = hostBuilder.HostingEnvironment.EnvironmentName;
 
             services
                 .AddSingleton(socialApiClient)
@@ -63,7 +60,7 @@ namespace kinny_social_bot
                 .AddHostedService<DiscordService>()
                 .AddHostedService<RedditService>();
         }
-        
+
         private static void ConfigureDelegate(IConfigurationBuilder builder)
         {
             builder.AddInMemoryCollection(DefaultConfiguration).AddEnvironmentVariables();
