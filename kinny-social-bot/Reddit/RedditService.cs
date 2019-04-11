@@ -20,6 +20,7 @@ namespace kinny_social_bot.Reddit
         private RedditSharp.Reddit _client;
         private string _userName;
         private BotWebAgent _webAgent;
+        private bool _started;
 
 
         public RedditService(SocialClient apiClient,
@@ -33,10 +34,24 @@ namespace kinny_social_bot.Reddit
             RedditCredentials credentials = await CredentialGetter.GetCredentials().ConfigureAwait(false);
             _userName = credentials.Username;
 
-            _webAgent = new BotWebAgent(credentials.Username, credentials.Password, credentials.ClientId,
-                credentials.ClientSecret, credentials.RedirectUrl);
-            _client = new RedditSharp.Reddit(_webAgent, true);
-            _webAgent.RateLimiter = new RateLimitManager(RateLimitMode.Pace);
+            do
+            {
+                try
+                {
+                    _webAgent = new BotWebAgent(credentials.Username, credentials.Password, credentials.ClientId,
+                        credentials.ClientSecret, credentials.RedirectUrl);
+                    _webAgent.RateLimiter = new RateLimitManager(RateLimitMode.Pace);
+                    //This actually authenticates with reddit, that's why it's in a try/catch while loop
+                    _client = new RedditSharp.Reddit(_webAgent, true);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    await Task.Delay(TimeSpan.FromMinutes(2)).ConfigureAwait(false);
+                    Logger.LogCritical(e.Message,e);
+                }
+            } while (true);
 
             StartReddit(cancellationToken);
             Logger.LogInformation($"{Platform} started on account '{_userName}'");
@@ -46,6 +61,7 @@ namespace kinny_social_bot.Reddit
 
         private async Task StartReddit(CancellationToken cancellationToken)
         {
+            _started = true;
             ListingStream<Comment> stream = _client.User.GetUsernameMentions(25).Stream();
             IAsyncEnumerator<Comment> listings = _client.User.GetUsernameMentions(25).GetEnumerator(25, -1, true);
             await listings.MoveNext();
