@@ -107,7 +107,7 @@ namespace kinny_social_bot.Discord
 
         protected override Task<bool> IsTip(SocketCommandContext context)
         {
-            var containsSlashCommand = context.Message.Content.ToLower().Contains($"/{_client.CurrentUser.Username}");
+            var containsSlashCommand = context.Message.Content.ToLower().Contains($"/{_client.CurrentUser.Username} ");
             var isBotMentioned = context.Message.MentionedUsers.Any(u => u.Username == _client.CurrentUser.Username);
 
             return Task.FromResult(containsSlashCommand || isBotMentioned);
