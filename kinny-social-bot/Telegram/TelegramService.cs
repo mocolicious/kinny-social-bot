@@ -117,7 +117,7 @@ namespace kinny_social_bot.Telegram
             {
                 return Task.FromResult(new ISocialUser[]
                 {
-                    new SocialUser(context.Message.ReplyToMessage.From.Username,
+                    new SocialUser(context.Message.ReplyToMessage.From.Username ?? context.Message.ReplyToMessage.From.FirstName,
                         context.Message.ReplyToMessage.From.Id.ToString())
                 });
             }
