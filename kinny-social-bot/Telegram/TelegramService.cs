@@ -64,7 +64,7 @@ namespace kinny_social_bot.Telegram
                 (s, l) => context.Message.From.Id);
 
             if (context.Message.Type != MessageType.Text) return;
-            Logger.LogInformation($"Received message from {context.Message.From.Username} ({context.Message.From.Id})");
+            Logger.LogInformation($"Received message from {context.Message.From.Username ?? context.Message.From.FirstName} ({context.Message.From.Id})");
             try
             {
                 await SendTip(context).ConfigureAwait(false);
