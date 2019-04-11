@@ -29,11 +29,11 @@ namespace kinny_social_core.Api
         private readonly ConcurrentQueue<SocialQueuedItem> _queueItems;
         private readonly string _secret;
 
-        public SocialClient(string secret)
+        public SocialClient(string secret, string hostname)
         {
             _secret = secret;
 
-            _client = RestService.For<ISocialClient>("https://prod-bot-api.kinny.io/");
+            _client = RestService.For<ISocialClient>(hostname);
             _queueItems = new ConcurrentQueue<SocialQueuedItem>();
             Timer timerQueueSendKin = new Timer(200);
             timerQueueSendKin.Elapsed += TimerQueueSendKinOnElapsed;

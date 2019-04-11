@@ -49,7 +49,7 @@ namespace kinny_social_bot
 
         private static void ConfigureDelegate(HostBuilderContext hostBuilder, IServiceCollection services)
         {
-            var socialApiClient = new SocialClient(hostBuilder.Configuration["secret"]);
+            var socialApiClient = new SocialClient(hostBuilder.Configuration["secret"], hostBuilder.Configuration["social_hostname"]);
             hostBuilder.HostingEnvironment.EnvironmentName = hostBuilder.Configuration["ASPNETCORE_ENVIRONMENT"];
 
             var wee = hostBuilder.HostingEnvironment.EnvironmentName;
