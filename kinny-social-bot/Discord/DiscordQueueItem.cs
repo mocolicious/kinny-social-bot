@@ -19,7 +19,18 @@ namespace kinny_social_bot.Discord
             Context = context;
         }
 
+        private async Task SendMessage(SocketUser user, Embed embeded)
+        {
+            try
+            {
+                await user.SendMessageAsync(null, false, embeded);
 
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
         public override async Task Reply(SocialTipStatusResponse response)
         {
             try
@@ -38,8 +49,8 @@ namespace kinny_social_bot.Discord
                     SocketUser dmUser =
                         Context.Message.MentionedUsers.FirstOrDefault(u => u.Id.ToString().Equals(SocialTipRequest.To));
 
-                    await dmUser.SendMessageAsync(null, false, embeded);
-                    
+
+                    await SendMessage(dmUser, embeded).ConfigureAwait(false);
                 }
 
                 if (response.Status != TransactionStatus.Ok)
@@ -61,8 +72,9 @@ namespace kinny_social_bot.Discord
 
                     embedBuilder.Description =
                         $"{SocialTipRequest.Amount} KIN sent to {SocialTipRequest.OfferParticipantsData.To.Username}!";
+                    Embed embeded = embedBuilder.Build();
 
-                    await Context.User.SendMessageAsync(null, false, embedBuilder.Build());
+                    await SendMessage(Context.User, embeded).ConfigureAwait(false);
                 }
             }
             catch (Exception e)

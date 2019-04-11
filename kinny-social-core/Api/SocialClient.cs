@@ -62,12 +62,12 @@ namespace kinny_social_core.Api
                     return;
                 }
 
-                SocialTipStatusResponse response = await Tip(item.TransactionId);
+                SocialTipStatusResponse response = await Tip(item.TransactionId).ConfigureAwait(false);
 
                 if (response.Status != TransactionStatus.Queued && response.Status != TransactionStatus.Error &&
                     response.Status != TransactionStatus.MarketPlaceApiError)
                 {
-                    await item.Reply(response);
+                    await item.Reply(response).ConfigureAwait(false); ;
                 }
                 else
                 {
@@ -139,7 +139,7 @@ namespace kinny_social_core.Api
             if (response.Status != TransactionStatus.Queued)
             {
                 await socialQueuedItem.Reply(
-                    new SocialTipStatusResponse { Message = response.Message, Status = response.Status });
+                    new SocialTipStatusResponse { Message = response.Message, Status = response.Status }).ConfigureAwait(false); ;
             }
 
             return response;
@@ -149,7 +149,7 @@ namespace kinny_social_core.Api
         {
             try
             {
-                return await _client.Tip(id, _secret);
+                return await _client.Tip(id, _secret).ConfigureAwait(false);
             }
             catch (ApiException e)
             {
@@ -161,7 +161,7 @@ namespace kinny_social_core.Api
         {
             try
             {
-                return await _client.Balance(id, provider, _secret);
+                return await _client.Balance(id, provider, _secret).ConfigureAwait(false); ;
             }
             catch (ApiException e)
             {
