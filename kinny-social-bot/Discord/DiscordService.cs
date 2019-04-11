@@ -36,7 +36,7 @@ namespace kinny_social_bot.Discord
             await _client.StartAsync();
 
             Logger.LogInformation($"{Platform} started on account '{_client.CurrentUser.Username}'");
-            //await Task.Delay(-1, cancellationToken);
+            await Task.Delay(-1, cancellationToken);
         }
         private async Task CommandProcessing(SocketMessage sm)
         {
