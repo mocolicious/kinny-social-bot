@@ -1,7 +1,7 @@
-﻿FROM microsoft/dotnet:2.1-aspnetcore-runtime AS base
+﻿FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
 
-FROM microsoft/dotnet:2.1-sdk AS build
+FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
 COPY ["kinny-social-bot/kinny-social-bot.csproj", "kinny-social-bot/"]
 COPY ["kinny-social-core/kinny-social-core.csproj", "kinny-social-core/"]
