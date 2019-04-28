@@ -133,7 +133,7 @@ namespace kinny_social_bot.Telegram
 
         protected override Task<bool> IsTip(Update context)
         {
-            bool containsSlashCommand = context.Message.Text.ToLower().Contains($"/{_currentUser.FirstName} ");
+            bool containsSlashCommand = context.Message.Text.ToLower().Contains($"/{_currentUser.FirstName}");
 
             bool isBotMentioned = context.Message.EntityValues != null
                                   && context.Message.EntityValues.Any(v => v.Contains(_currentUser.Username));
