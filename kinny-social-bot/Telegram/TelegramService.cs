@@ -83,7 +83,20 @@ namespace kinny_social_bot.Telegram
 
             try
             {
-                await SendTip(context).ConfigureAwait(false);
+                if (context.Message.Text.Equals("/start kinny"))
+                {
+                    await _client.SendTextMessageAsync(context.Message.Chat.Id, DmHelpStart).ConfigureAwait(false);
+                } else if (context.Message.Text.Equals("/help"))
+                {
+                    await _client.SendTextMessageAsync(context.Message.Chat.Id, DmHelpMessage).ConfigureAwait(false);
+                } else if (context.Message.Text.Equals("/kinnytips") || context.Message.Text.Equals("@kinnytip_bot"))
+                {
+                   await _client.SendTextMessageAsync(context.Message.Chat.Id, LearnMessage).ConfigureAwait(false);
+                }
+                else
+                {
+                    await SendTip(context).ConfigureAwait(false);
+                }
             }
             catch (Exception e)
             {
@@ -94,7 +107,7 @@ namespace kinny_social_bot.Telegram
                 if (inner is SocialException sex)
                 {
                     await _client.SendTextMessageAsync(context.Message.Chat.Id, sex.Message, ParseMode.Default, false,
-                        false, context.Message.MessageId);
+                        false, context.Message.MessageId).ConfigureAwait(false);
                 }
 
                 Logger.LogError(inner.Message, inner);
@@ -111,6 +124,12 @@ namespace kinny_social_bot.Telegram
         {
             return Task.FromResult(context.Message.Text);
         }
+
+        private const string DmHelpStart = "Welcome to Kinny! Kinny allows you to send and receive Kin over social media including Telegram, Discord, Reddit and Twitter. You can use Kinny to tip your friends or your favorite content creators easily and show them how much you care. Learn more about Kinny at kinny.io. To get started using Kinny in Telegram, press /help.";
+
+        private const string DmHelpMessage =
+            "How to connect your Telegram account to Kinny:\r\n\r\n1. Register on Kinny.io.\r\n2. Log in and go to Profile>Social logins.\r\n3. Click the Telegram service to add to your registered logins. You must have a valid Telegram username (navigate to Settings>Profile>Username).\r\n4. Authorize and login to Telegram when prompted.\r\n\r\nCongratulations! You can now receive and send tips to your friends within Telegram!\r\n\r\nHow to tip:\r\n\r\n1. For direct tips: @username +amount /kinnytips\r\n2. For direct reply tips: +amount /kinnytips\r\n3. For direct multi user tips: @username1 @username2 +amount /kinnytips\r\n\r\nYou can view your recent transaction history in the Kinny.io dashboard.";
+        private const string LearnMessage = "Learn about Kinny here (https://telegram.me/kinnytip_bot?start=kinny)\r\nHow to tip Kin using Kinny:\r\n1. For (new message) direct tips: @username +amount /kinnytips\r\n2. For direct reply tips: +amount /kinnytips";
 
         protected override Task<bool> IsTip(Update context)
         {
