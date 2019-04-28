@@ -85,7 +85,7 @@ namespace kinny_social_bot.Telegram
             {
                 var isPrivate = context.Message.Chat.Type == ChatType.Private;
 
-                if (context.Message.Text.Equals("/start kinny") && isPrivate)
+                if (context.Message.Text.StartsWith("/start") && isPrivate)
                 {
                     await _client.SendTextMessageAsync(context.Message.Chat.Id, DmHelpStart).ConfigureAwait(false);
                 } else if (context.Message.Text.Equals("/help") && isPrivate)
