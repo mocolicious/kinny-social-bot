@@ -56,7 +56,7 @@ namespace kinny_social_core.Services
 
             if (mentionedUsers.Length == 0)
             {
-                throw new NoUserMentionedException("Learn about Kinny here (https://telegram.me/kinnytip_bot?start=kinny)\r\nHow to tip Kin using Kinny:\r\n1. For (new message) direct tips: @username +amount /kinnytips\r\n2. For direct reply tips: +amount /kinnytips");
+                throw new NoUserMentionedException("Learn about Kinny here (https://telegram.me/kinnytip_bot?start=kinny) \r\nHow to tip Kin using Kinny:\r\n1. For (new message) direct tips: @username +amount /kinnytips\r\n2. For direct reply tips: +amount /kinnytips");
             }
 
             string messageText = await GetMessageText(context).ConfigureAwait(false);
