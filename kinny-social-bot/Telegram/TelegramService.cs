@@ -85,13 +85,13 @@ namespace kinny_social_bot.Telegram
             {
                 var isPrivate = context.Message.Chat.Type == ChatType.Private;
 
-                if (context.Message.Text.Equals("/start kinny"))
+                if (context.Message.Text.Equals("/start kinny") && isPrivate)
                 {
                     await _client.SendTextMessageAsync(context.Message.Chat.Id, DmHelpStart).ConfigureAwait(false);
                 } else if (context.Message.Text.Equals("/help") && isPrivate)
                 {
                     await _client.SendTextMessageAsync(context.Message.Chat.Id, DmHelpMessage).ConfigureAwait(false);
-                } else if (context.Message.Text.Equals("/kinnytips") || context.Message.Text.Equals("@kinnytip_bot") && isPrivate)
+                } else if (context.Message.Text.Equals("/kinnytips") || context.Message.Text.Equals("@kinnytip_bot"))
                 {
                    await _client.SendTextMessageAsync(context.Message.Chat.Id, LearnMessage).ConfigureAwait(false);
                 }
