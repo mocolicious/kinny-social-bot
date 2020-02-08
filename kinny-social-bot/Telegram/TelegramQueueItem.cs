@@ -37,10 +37,10 @@ namespace kinny_social_bot.Telegram
                 ChatId fromChatId = new ChatId(SocialTipRequest.From);
                 ChatId toChatId = new ChatId(SocialTipRequest.To);
 
-                if (response.Message.Equals("Duplicate transaction"))
-                {
-                    return;
-                }
+               // if (response.Message.Equals("Duplicate transaction"))
+               // {
+               //    return;
+               // }
 
                 if (response.Status != TransactionStatus.Ok)
                 {

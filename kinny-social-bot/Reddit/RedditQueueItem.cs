@@ -33,10 +33,10 @@ namespace kinny_social_bot.Reddit
         {
             try
             {
-                if (response.Message.Equals("Duplicate transaction"))
-                {
-                    return;
-                }
+               // if (response.Message.Equals("Duplicate transaction"))
+               // {
+               //     return;
+               // }
 
                 if (response.Status != TransactionStatus.Ok)
                 {
